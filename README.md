@@ -5,7 +5,9 @@ Patreonomy is a PHP library for Patreon's v2 API. It works with both the regular
 Patreonomy requires 64-bit PHP 8.0.0 or later.
 
 ## Documentation
-Documentation coming soon...
+Raw documentation is available via phpDocumentor in the `/docs` directory or viewable at [rytoonist.github.io/Patreonomy](https://rytoonist.github.io/Patreonomy/).
+
+I'm actively working on a github wiki for the project.
 
 ## Getting Started
 1. Install the library with [Composer](https://getcomposer.org):
