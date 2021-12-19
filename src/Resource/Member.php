@@ -125,30 +125,40 @@
 
 		/**
 		 * Get the data for this resource
+		 * @param  array $fields   Array of field flags
+		 * @param  array $includes Array of include flags
 		 * @return self
 		 */
-		public function get(...$arguments) : self {
-			\extract($arguments);
-
-			$fields ??= [
-				"address"  => \Patreonomy\Resource\Address::ALL_FIELD_FLAGS,
-				"campaign" => \Patreonomy\Resource\Campaign::ALL_FIELD_FLAGS,
-				"member"   => \Patreonomy\Resource\Member::ALL_FIELD_FLAGS,
-				"tier"     => \Patreonomy\Resource\Tier::ALL_FIELD_FLAGS,
-				"user"     => \Patreonomy\Resource\User::ALL_FIELD_FLAGS,
-			];
-
-			$includes ??= [
-				"address",
-				"campaign",
-				"currently_entitled_tiers",
-				"user",
-			];
-
-			return parent::get(
+		public function get(
+			array $fields   = [],
+			array $includes = [],
+		) : self {
+			return parent::__getData(
 				endpoint: \Patreonomy\Patreonomy::ENDPOINT_API . "/members/" . $this->getId(),
-				fields:   $fields,
-				includes: $includes,
+				fields:   $fields ?: [
+					"address" => \Patreonomy\Resource\Address::ALL_FIELD_FLAGS,
+					"benefit" => \Patreonomy\Resource\Benefit::ALL_FIELD_FLAGS,
+					"member"  => \Patreonomy\Resource\Member::ALL_FIELD_FLAGS,
+					"tier"    => \Patreonomy\Resource\Tier::ALL_FIELD_FLAGS,
+					"user"    => \Patreonomy\Resource\User::ALL_FIELD_FLAGS,
+				],
+				includes: $includes ?: [
+					"address",
+					"campaign",
+					"currently_entitled_tiers",
+					"currently_entitled_tiers.benefits",
+					"currently_entitled_tiers.campaign",
+					"user",
+				],
 			);
+		}
+
+		/**
+		 * Search the member's tiers list
+		 * @param  array ...$filters Filters
+		 * @return array             Array of matching Tier objects
+		 */
+		public function searchTiers(...$filters) : array {
+			return \Patreonomy\Patreonomy::searchArray($this->get()->getCurrentlyEntitledTiers(), $filters);
 		}
 	}

@@ -103,42 +103,40 @@
 
 		/**
 		 * Get the data for this resource
+         * @param  array $fields   Array of field flags
+         * @param  array $includes Array of include flags
 		 * @return self
 		 */
-		public function get(...$arguments) : self {
-			\extract($arguments);
-
-			$fields ??= [
-				"campaign" => \Patreonomy\Resource\Campaign::ALL_FIELD_FLAGS,
-				"user"     => \Patreonomy\Resource\User::ALL_FIELD_FLAGS,
-				"post"     => \Patreonomy\Resource\Post::ALL_FIELD_FLAGS,
-			];
-
-			$includes ??= [
-				"campaign",
-				"user",
-			];
-
-			return parent::get(
+		public function get(
+            array $fields   = [],
+            array $includes = [],
+        ) : self {
+			return parent::__getData(
 				endpoint: \Patreonomy\Patreonomy::ENDPOINT_API . "/posts/" . $this->getId(),
-				fields:   $fields,
-				includes: $includes,
+				fields:   $fields ?: [
+					"campaign" => \Patreonomy\Resource\Campaign::ALL_FIELD_FLAGS,
+					"user"     => \Patreonomy\Resource\User::ALL_FIELD_FLAGS,
+					"post"     => \Patreonomy\Resource\Post::ALL_FIELD_FLAGS,
+				],
+				includes: $includes ?: [
+					"campaign",
+					"user",
+				],
 			);
 		}
 
 		/**
 		 * Get this post's comments
-		 * @param  array  $fields   Array of field flags
-		 * @param  array  $includes Array of include flags
-		 * @return array            Array of Comment objects
+		 * @legacy This method uses a v1 API endpoint
+		 * @param  array $fields   Array of field flags
+		 * @param  array $includes Array of include flags
+		 * @return array           Array of Comment objects
 		 */
-		public function getComments(...$arguments) : array {
+		public function getComments(
+            array $fields   = [],
+            array $includes = [],
+		) : array {
 			if (empty($this->comments)) {
-				\extract($arguments);
-
-				$fields   ??= [];
-				$includes ??= [];
-
 				$this->comments = $this->__parent->getResources(
 					resource: "Comment",
 					endpoint: \Patreonomy\Patreonomy::ENDPOINT_LEGACY . "/posts/" . $this->getId() . "/comments",

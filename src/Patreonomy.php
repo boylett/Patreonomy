@@ -52,11 +52,53 @@
 		public array $webhooks = [];
 
 		/**
+		 * Search an array for matching objects
+		 * @param  array $array   List of objects
+		 * @param  array $filters Object filters
+		 * @return array          Matching objects
+		 */
+		public static function searchArray(array $array, array $filters) : array {
+			$contenders = [];
+
+			foreach ($array as $item) {
+				if (\is_object($item)) {
+					foreach ($filters as $key => $value) {
+						if (!isset($item->{$key})) {
+							continue 2;
+						}
+
+						else if (\is_array($item->{$key}) and \is_array($value)) {
+							if (empty(static::searchArray($item->{$key}, $value))) {
+								continue 2;
+							}
+						}
+
+						else if (\is_string($item->{$key}) and \is_string($value) and \preg_match("/^(\/|#|~|\(|\[|{)([\s\S]+?)(\/|#|~|\)|\]|})([imsxUXJ]+)?$/m", $value)) {
+							if (!\preg_match($value, $item->{$key})) {
+								continue 2;
+							}
+						}
+
+						else if ($item->{$key} !== $value) {
+							continue 2;
+						}
+					}
+
+					$contenders[] = $item;
+				}
+			}
+
+			return $contenders;
+		}
+
+		/**
 		 * Adopt a resource
 		 * @param  \Patreonomy\Resource\AbstractResource $resource Resource
 		 * @return \Patreonomy\Resource\AbstractResource           Resource
 		 */
-		public function adopt(\Patreonomy\Resource\AbstractResource $resource) : \Patreonomy\Resource\AbstractResource {
+		public function adopt(
+			\Patreonomy\Resource\AbstractResource $resource,
+		) : \Patreonomy\Resource\AbstractResource {
 			$resource->__parent = $this;
 
 			return $resource;
@@ -64,13 +106,26 @@
 
 		/**
 		 * Connect Patreonerly to the Patreon API
-		 * @param string $client_id     Used to identify your application/tool with the client you registered
-		 * @param string $client_secret Used to authenticate your application/tool with the client you registered
-		 * @param string $access_token  Which can be used to access the API in the context of the creator you account you made when registering a client
-		 * @param string $refresh_token Can be used to refresh new access tokens
+		 * @param string $client_id      Used to identify your application/tool with the client you registered
+		 * @param string $client_secret  Used to authenticate your application/tool with the client you registered
+		 * @param string $access_token   Which can be used to access the API in the context of the creator you account you made when registering a client
+		 * @param string $refresh_token  Can be used to refresh new access tokens
+		 * @param string $webhook_secret Used to verify incoming webhooks
 		 */
-		public function connect(...$arguments) : self {
-			$this->authorization = $arguments;
+		public function connect(
+			string $client_id      = "",
+			string $client_secret  = "",
+			string $access_token   = "",
+			string $refresh_token  = "",
+			string $webhook_secret = "",
+		) : self {
+			$this->authorization = \array_filter([
+				"client_id"      => $client_id,
+				"client_secret"  => $client_secret,
+				"access_token"   => $access_token,
+				"refresh_token"  => $refresh_token,
+				"webhook_secret" => $webhook_secret,
+			], fn($config) => !empty($config));
 
 			return $this;
 		}
@@ -82,11 +137,12 @@
 		 * @param  array                        $triggers    Array of webhook triggers (see constants in \Patreonomy\Resource\Webhook)
 		 * @return \Patreonomy\Resource\Webhook              The resulting Webhook object
 		 */
-		public function createWebhook(...$arguments) : \Patreonomy\Resource\Webhook {
-			$campaign_id ??= 0;
-			$uri         ??= "";
-
-			$triggers ??= [
+		public function createWebhook(
+			int    $campaign_id,
+			string $uri,
+			array  $triggers    = [],
+		) : \Patreonomy\Resource\Webhook {
+			$triggers = $triggers ?: [
 				\Patreonomy\Resource\Webhook::TRIGGER_MEMBERS_CREATE,
 				\Patreonomy\Resource\Webhook::TRIGGER_MEMBERS_UPDATE,
 				\Patreonomy\Resource\Webhook::TRIGGER_MEMBERS_DELETE,
@@ -97,14 +153,6 @@
 				\Patreonomy\Resource\Webhook::TRIGGER_POSTS_UPDATE,
 				\Patreonomy\Resource\Webhook::TRIGGER_POSTS_DELETE,
 			];
-
-			if (!$campaign_id) {
-				throw new \Patreonomy\Response\Exception("You must supply a Campaign ID (campaign_id) when using " . \get_called_class() . "::createWebhook()");
-			}
-
-			if (!$uri) {
-				throw new \Patreonomy\Response\Exception("You must supply a Webhook Destination URI (uri) when using " . \get_called_class() . "::createWebhook()");
-			}
 
 			$response = $this->request(
 				endpoint: static::ENDPOINT_API . "/webhooks",
@@ -133,25 +181,24 @@
 
 		/**
 		 * Make a request to the Patreon API
-		 * @param  bool   $authorization Whether to send an OAuth Bearer Token header
-		 * @param  array  $data          Payload data
 		 * @param  string $endpoint      Relative path to Patreon API endpoint
+		 * @param  bool   $authorization Whether to send an OAuth Bearer Token header
+		 * @param  array  $data          JSON payload data
+		 * @param  array  $form_params   Multipart form parameters to supply instead of `$data`
+		 * @param  array  $options       Additional options to pipe through to Guzzle
 		 * @param  string $type          HTTP request type - one of "get", "patch" or "post"
 		 * @return array                 JSON response
 		 */
-		public function request(...$arguments) : array {
-			\extract($arguments);
-
-			$authorization ??= true;
-			$data          ??= [];
-			$form_params   ??= [];
-			$options       ??= [];
-			$response        = [];
-			$type            = \strtoupper($type ?? "get");
-
-			if (!isset($endpoint)) {
-				throw new \Patreonomy\Response\Exception("You must supply an Endpoint (endpoint) when using " . \get_called_class() . "::request()");
-			}
+		public function request(
+			string $endpoint,
+			bool   $authorization = true,
+			array  $data          = [],
+			array  $form_params   = [],
+			array  $options       = [],
+			string $type          = "GET",
+		) : array {
+			$response = [];
+			$type     = \strtoupper(\trim($type));
 
 			if (\str_contains($endpoint, ":")) {
 				$endpoint = \preg_replace_callback_array([
@@ -231,38 +278,35 @@
 
 		/**
 		 * Get a list of campaigns that this token has access to
+		 * @link   https://docs.patreon.com/?shell#get-api-oauth2-v2-campaigns
 		 * @param  array $fields   Array of field flags
 		 * @param  array $includes Array of include flags
 		 * @return array           Array of Campaign objects
 		 */
-		public function getCampaigns(...$arguments) : array {
+		public function getCampaigns(
+			array $fields   = [],
+			array $includes = [],
+		) : array {
 			if (empty($this->campaigns)) {
-				\extract($arguments);
-
-				$fields ??= [
-					"benefit"  => \Patreonomy\Resource\Benefit::ALL_FIELD_FLAGS,
-					"campaign" => \Patreonomy\Resource\Campaign::ALL_FIELD_FLAGS,
-					"goal"     => \Patreonomy\Resource\Goal::ALL_FIELD_FLAGS,
-					"tier"     => \Patreonomy\Resource\Tier::ALL_FIELD_FLAGS,
-					"user"     => \Patreonomy\Resource\User::ALL_FIELD_FLAGS,
-				];
-
-				$includes ??= [
-					"benefits",
-					"categories",
-					"creator",
-					"goals",
-					"tiers",
-
-					// TODO: Figure out what this is for
-					//"campaign_installations",
-				];
-				
 				$this->campaigns = $this->getResources(
 					resource: "Campaign",
 					endpoint: static::ENDPOINT_API . "/campaigns",
-					fields:   $fields,
-					includes: $includes,
+					fields:   $fields ?: [
+						"benefit"  => \Patreonomy\Resource\Benefit::ALL_FIELD_FLAGS,
+						"campaign" => \Patreonomy\Resource\Campaign::ALL_FIELD_FLAGS,
+						"goal"     => \Patreonomy\Resource\Goal::ALL_FIELD_FLAGS,
+						"tier"     => \Patreonomy\Resource\Tier::ALL_FIELD_FLAGS,
+						"user"     => \Patreonomy\Resource\User::ALL_FIELD_FLAGS,
+					],
+					includes: $includes ?: [
+						"benefits",
+						"categories",
+						"creator",
+						"goals",
+						"tiers",
+
+						// TODO: Figure out what `campaign_installations` is for (IT IS UNDOCUMENTED)
+					],
 				);
 			}
 
@@ -286,6 +330,7 @@
 
 		/**
 		 * Access information about the current User with reference to the oauth token
+		 * @link   https://docs.patreon.com/?shell#get-api-oauth2-v2-identity
 		 * @return \Patreonomy\Resource\User
 		 */
 		public function getIdentity() : \Patreonomy\Resource\User {
@@ -310,26 +355,26 @@
 
 		/**
 		 * Get the OAuth2 authorization request URL
-		 * @param  array|string $scope         An array or space-separated list of OAuth2 scopes (see constants in \Patreonomy\Response\OAuthToken)
-		 * @param  string       $prompt        Controls how the authorization flow handles existing authorizations. Can be set to 'none' or 'consent' - defaults to 'consent'
 		 * @param  string       $redirect_uri  Whatever URL you registered when creating your application
+		 * @param  string       $prompt        Controls how the authorization flow handles existing authorizations. Can be set to 'none' or 'consent' - defaults to 'consent'
 		 * @param  string       $response_type Whether to request an implicit grant ('token') or explicit grant ('code') - defaults to 'code'
+		 * @param  array|string $scope         An array or space-separated list of OAuth2 scopes (see constants in \Patreonomy\Response\OAuthToken)
 		 * @param  string       $state         Unique verification string or hash to verify connection origin
 		 * @return string                      OAuth2 authorization URL
 		 */
-		public function getOAuthUrl(...$arguments) : string {
+		public function getOAuthUrl(
+			string       $redirect_uri,
+			string       $prompt        = "consent",
+			string       $response_type = "code",
+			array|string $scope         = [],
+			string       $state         = "",
+		) : string {
 			if (!isset($this->authorization["client_id"])) {
 				throw new \Patreonomy\Response\Exception("You must supply a Client/Application ID (client_id) during " . \get_called_class() . "::connect() when using " . \get_called_class() . "::getOAuthUrl()");
 			}
 
-			$arguments["response_type"] ??= "code";
-
-			if (($arguments["response_type"] === "token") and !isset($this->authorization["client_secret"])) {
+			if (($response_type === "token") and !isset($this->authorization["client_secret"])) {
 				throw new \Patreonomy\Response\Exception("You must supply a Client Secret (client_secret) during " . \get_called_class() . "::connect() when using " . \get_called_class() . "::getOAuthUrl(response_type: 'token')");
-			}
-
-			if (!isset($arguments["redirect_uri"])) {
-				throw new \Patreonomy\Response\Exception("You must supply a Redirect URI (redirect_uri) when using " . \get_called_class() . "::getOAuthUrl()");
 			}
 
 			$default_scope = \implode(" ", [
@@ -338,37 +383,60 @@
 				\Patreonomy\Resource\OAuthToken::SCOPE_CAMPAIGNS,
 			]);
 			
-			if (empty($arguments["scope"] ?? "")) {
-				$arguments["scope"] = $default_scope;
+			if (empty($scope ?? "")) {
+				$scope = $default_scope;
 			}
 
-			else if (\is_array($arguments["scope"] ?? "")) {
-				$arguments["scope"] = \implode(" ", \array_unique(\array_merge($arguments["scope"]), \explode(" ", $default_scope)));
+			else if (\is_array($scope ?? "")) {
+				$scope = \implode(" ", \array_unique(\array_merge($scope), \explode(" ", $default_scope)));
 			}
 
-			if (!isset($arguments["state"])) {
+			if (empty($state)) {
 				$left     = \hash("CRC32B", __FILE__ . \random_bytes(8));
 				$time_max = \strtotime("+1 hour");
 				$right    = \hash("CRC32B", $left . "Patreonomy OAuth State Hash" . $time_max);
 
-				$arguments["state"] = $left . $time_max . $right;
+				$state = $left . $time_max . $right;
 			}
 
-			return static::ENDPOINT_OAUTH . "/authorize?" . \http_build_query(\array_merge($arguments, [
+			$query = [
 				"client_id"     => $this->authorization["client_id"],
-			], ($arguments["response_type"] === "token") ? [] : [
-				"client_secret" => $this->authorization["client_secret"],
-			]));
+				"prompt"        => $prompt,
+				"redirect_uri"  => $redirect_uri,
+				"response_type" => $response_type,
+				"scope"         => $scope,
+				"state"         => $state,
+			];
+
+			if ($response_type === "token") {
+				$query["client_secret"] = $this->authorization["client_secret"];
+			}
+
+			return static::ENDPOINT_OAUTH . "/authorize?" . \http_build_query($query);
 		}
 
 		/**
-		 * Get a set of resources attached to this resource
-		 * @param  array ...$arguments Arguments
-		 * @return array               Array of resources
+		 * Get a set of resources
+		 * @param  string $endpoint  Full resource endpoint
+		 * @param  string $resource  Resource class name
+		 * @param  bool   $autofetch Whether to automatically fetch additional results when available (performs multiple consecutive API calls)
+		 * @param  int    $count     Number of results to return (defaults to 200)
+		 * @param  string $cursor    Page cursor
+		 * @param  array  $fields    Array of field flags
+		 * @param  array  $includes  Array of include flags
+		 * @param  string $sort      How to sort the results (can be one of 'created', '-created', 'modified' or '-modified')
+		 * @return array             Array of resources
 		 */
-		public function getResources(...$arguments) : array {
-			\extract($arguments);
-
+		public function getResources(
+			string $endpoint,
+			string $resource,
+			bool   $autofetch = true,
+			int    $count     = 200,
+			string $cursor    = "",
+			array  $fields    = [],
+			array  $includes  = [],
+			string $sort      = "",
+		) : array {
 			/**
 			 * Item limit is documented as page[count] but is actually page[size]
 			 * @link https://docs.patreon.com/#pagination-and-sorting                                     (INCORRECT)
@@ -380,21 +448,7 @@
 			 * @link https://www.patreondevelopers.com/t/recommended-api-usage-limits/122/5
 			 */
 
-			$autofetch ??= true;
-			$count     ??= 200;
-			$cursor    ??= false;
-			$endpoint  ??= false;
-			$fields    ??= [];
-			$includes  ??= [];
-			$resource  ??= false;
-			$results     = [];
-			$sort      ??= false;
-
-			if (!$endpoint) {
-				throw new \Patreonomy\Response\Exception("No endpoint supplied in " . \get_called_class() . "::getResources()");
-			}
-
-			if (!$resource or !\method_exists($this, $resource)) {
+			if (!\method_exists($this, $resource)) {
 				throw new \Patreonomy\Response\Exception("Resource type '" . $resource . "' does not exist");
 			}
 
@@ -416,10 +470,17 @@
 				]);
 			}
 
-			if ($autofetch and $response["meta"]["pagination"]["cursors"]["next"] ?? false) {
-				$results = \array_merge($results, \call_user_func_array([ $this, "getResources" ], \array_merge($arguments, [
-					"cursor" => $response["meta"]["pagination"]["cursors"]["next"],
-				])));
+			if ($autofetch and ($response["meta"]["pagination"]["cursors"]["next"] ?? false)) {
+				$results = \array_merge($results, \call_user_func_array([ $this, "getResources" ], [
+					"endpoint"  => $endpoint,
+					"resource"  => $resource,
+					"autofetch" => $autofetch,
+					"count"     => $count,
+					"cursor"    => $response["meta"]["pagination"]["cursors"]["next"],
+					"fields"    => $fields,
+					"includes"  => $includes,
+					"sort"      => $sort,
+				]));
 			}
 
 			return $results;
@@ -432,28 +493,25 @@
 		 * @param  array $includes Array of include flags
 		 * @return array           Array of Webhook objects
 		 */
-		public function getWebhooks(...$arguments) : array {
+		public function getWebhooks(
+			array $fields   = [],
+			array $includes = [],
+		) : array {
 			if (empty($this->webhooks)) {
-				\extract($arguments);
-
-				$fields ??= [
-					"webhook"  => \Patreonomy\Resource\Webhook::ALL_FIELD_FLAGS,
-					"campaign" => \Patreonomy\Resource\Campaign::ALL_FIELD_FLAGS,
-					
-					// TODO: For some reason, including the 'client' field crashes this endpoint. Must investigate.
-					//"client"   => \Patreonomy\Resource\OAuthClient::ALL_FIELD_FLAGS,
-				];
-
-				$includes ??= [
-					"campaign",
-					"client",
-				];
-				
 				$this->webhooks = $this->getResources(
 					resource: "Webhook",
 					endpoint: static::ENDPOINT_API . "/webhooks",
-					fields:   $fields,
-					includes: $includes,
+					fields:   $fields ?: [
+						"webhook"  => \Patreonomy\Resource\Webhook::ALL_FIELD_FLAGS,
+						"campaign" => \Patreonomy\Resource\Campaign::ALL_FIELD_FLAGS,
+						
+						// TODO: For some reason including the 'client' field crashes this endpoint. Will investigate.
+						//"client"   => \Patreonomy\Resource\OAuthClient::ALL_FIELD_FLAGS,
+					],
+					includes: $includes ?: [
+						"campaign",
+						"client",
+					],
 				);
 			}
 
@@ -462,10 +520,13 @@
 
 		/**
 		 * Handle a Webhook interaction
+		 * @link https://docs.patreon.com/?shell#webhooks
 		 * @param  callable $callback Callback method that handles the interaction. Arguments: (array $payload, array $headers, string $trigger)
 		 * @return self
 		 */
-		public function receiveWebhook(callable $callback) : self {
+		public function receiveWebhook(
+			callable $callback,
+		) : self {
 			if (!isset($this->authorization["webhook_secret"])) {
 				throw new \Patreonomy\Response\Exception("You must supply a Webhook Secret (webhook_secret) during " . \get_called_class() . "::connect() when using " . \get_called_class() . "::receiveWebhook()");
 			}
@@ -473,13 +534,7 @@
 			$raw_data = \file_get_contents("php://input") ?: "{}";
 			$data     = \json_decode($raw_data, true);
 
-			/**
-			 * Verify the payload with hash_hmac
-			 */
 			if (\hash_equals($_SERVER["HTTP_X_PATREON_SIGNATURE"] ?? "", \hash_hmac("md5", $raw_data, $this->authorization["webhook_secret"]))) {
-				/**
-				 * Determine what to do based on the patreon event header
-				 */
 				switch ($_SERVER["HTTP_X_PATREON_EVENT"] ?? "") {
 					default: {
 						throw new \Patreonomy\Response\Exception("Unknown interaction type");
@@ -517,7 +572,9 @@
 		 * @param  string                          $refresh_token Refresh token
 		 * @return \Patreonomy\Resource\OAuthToken
 		 */
-		public function refreshOAuthToken(string $refresh_token) : \Patreonomy\Resource\OAuthToken {
+		public function refreshOAuthToken(
+			string $refresh_token,
+		) : \Patreonomy\Resource\OAuthToken {
 			if (!isset($this->authorization["client_id"])) {
 				throw new \Patreonomy\Response\Exception("You must supply a Client ID (client_id) during " . \get_called_class() . "::connect() when using " . \get_called_class() . "::refreshOAuthToken()");
 			}
@@ -547,11 +604,14 @@
 
 		/**
 		 * Request an OAuth2 token from Patreon
-		 * @param  string                            $redirect_uri Your redirect URI
-		 * @param  string                            $code         The code from the querystring
+		 * @param  string                          $redirect_uri Your redirect URI
+		 * @param  string                          $code         The code from the querystring
 		 * @return \Patreonomy\Resource\OAuthToken
 		 */
-		public function requestOAuthToken(string $redirect_uri, string $code = "") : \Patreonomy\Resource\OAuthToken {
+		public function requestOAuthToken(
+			string $redirect_uri, 
+			string $code         = "",
+		) : \Patreonomy\Resource\OAuthToken {
 			if (!isset($this->authorization["client_id"])) {
 				throw new \Patreonomy\Response\Exception("You must supply a Client ID (client_id) during " . \get_called_class() . "::connect() when using " . \get_called_class() . "::requestOAuthToken()");
 			}
@@ -581,11 +641,22 @@
 		}
 
 		/**
+		 * Search the campaigns list
+		 * @param  array ...$filters Filters
+		 * @return array             Array of matching Campaign objects
+		 */
+		public function searchCampaigns(...$filters) : array {
+			return static::searchArray($this->getCampaigns(), $filters);
+		}
+
+		/**
 		 * Verify the supplied OAuth State Hash
 		 * @param  string $state State hash
 		 * @return bool          Whether the state hash is valid
 		 */
-		public function verifyOAuthState(string $state) : bool {
+		public function verifyOAuthState(
+			string $state,
+		) : bool {
 			if (\preg_match("/^([a-f0-9]{8})([0-9]+)([a-f0-9]{8})$/i", $state, $parts)) {
 				$left     = $parts[1] ?? "";
 				$time_max = \intval($parts[2] ?? 0);

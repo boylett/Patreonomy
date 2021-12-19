@@ -71,15 +71,16 @@
 
 		/**
 		 * Get the data for this resource
+         * @legacy This method uses a v1 API endpoint
+         * @param  array $fields   Array of field flags
+         * @param  array $includes Array of include flags
 		 * @return self
 		 */
-		public function get(...$arguments) : self {
-			\extract($arguments);
-
-			$fields   ??= [];
-			$includes ??= [];
-
-			return parent::get(
+		public function get(
+            array $fields   = [],
+            array $includes = [],
+        ) : self {
+			return parent::__getData(
 				endpoint: \Patreonomy\Patreonomy::ENDPOINT_LEGACY . "/comments/" . $this->getId(),
 				fields:   $fields,
 				includes: $includes,

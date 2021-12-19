@@ -221,66 +221,91 @@
 
 		/**
 		 * Get the data for this resource
+		 * @param  array $fields   Array of field flags
+		 * @param  array $includes Array of include flags
 		 * @return self
 		 */
-		public function get(...$arguments) : self {
-			\extract($arguments);
-
-			$fields ??= [
-				"benefit"  => \Patreonomy\Resource\Benefit::ALL_FIELD_FLAGS,
-				"campaign" => \Patreonomy\Resource\Campaign::ALL_FIELD_FLAGS,
-				"goal"     => \Patreonomy\Resource\Goal::ALL_FIELD_FLAGS,
-				"tier"     => \Patreonomy\Resource\Tier::ALL_FIELD_FLAGS,
-				"user"     => \Patreonomy\Resource\User::ALL_FIELD_FLAGS,
-			];
-
-			$includes ??= [
-				"benefits",
-				"categories",
-				"creator",
-				"goals",
-				"tiers",
-
-				// TODO: Figure out what this is for (IT IS UNDOCUMENTED)
-				//"campaign_installations",
-			];
-
-			if (\in_array("categories", $includes)) {
+		public function get(
+			array $fields   = [],
+			array $includes = [],
+		) : self {
+			if (\in_array("categories", $includes ?: [ "categories" ])) {
 				$this->__parent->getCategories();
 			}
 
-			return parent::get(
+			return parent::__getData(
 				endpoint: \Patreonomy\Patreonomy::ENDPOINT_API . "/campaigns/" . $this->getId(),
-				fields:   $fields,
-				includes: $includes,
+				fields:   $fields ?: [
+					"benefit"  => \Patreonomy\Resource\Benefit::ALL_FIELD_FLAGS,
+					"campaign" => \Patreonomy\Resource\Campaign::ALL_FIELD_FLAGS,
+					"goal"     => \Patreonomy\Resource\Goal::ALL_FIELD_FLAGS,
+					"tier"     => \Patreonomy\Resource\Tier::ALL_FIELD_FLAGS,
+					"user"     => \Patreonomy\Resource\User::ALL_FIELD_FLAGS,
+				],
+				includes: $includes ?: [
+					"categories",
+					"creator",
+					"goals",
+
+					// TODO: Figure out what `campaign_installations` is for (IT IS UNDOCUMENTED)
+				],
 			);
 		}
 
 		/**
-		 * Gets the Members for a given Campaign. Requires the campaigns.members scope
-		 * @param  array  $fields   Array of field flags
-		 * @param  array  $includes Array of include flags
-		 * @return array            Array of Member objects
+		 * Get a list of all the Benefits on a given Campaign by campaign ID
+		 * @param  array $fields   Array of field flags
+		 * @param  array $includes Array of include flags
+		 * @return array           Array of Post objects
 		 */
-		public function getMembers(...$arguments) : array {
+		public function getBenefits(
+			array $fields   = [],
+			array $includes = [],
+		) : array {
+			if (empty($this->benefits)) {
+				parent::__getData(
+					endpoint: \Patreonomy\Patreonomy::ENDPOINT_API . "/campaigns/" . $this->getId(),
+					fields:   $fields ?: [
+						"benefit" => \Patreonomy\Resource\Benefit::ALL_FIELD_FLAGS,
+						"tier"    => \Patreonomy\Resource\Tier::ALL_FIELD_FLAGS,
+					],
+					includes: $includes ?: [
+						"benefits",
+						"benefits.tiers",
+						"tiers",
+					],
+				);
+			}
+
+			return $this->benefits;
+		}
+
+		/**
+		 * Gets the Members for a given Campaign. Requires the campaigns.members scope
+		 * @param  array $fields   Array of field flags
+		 * @param  array $includes Array of include flags
+		 * @return array           Array of Member objects
+		 */
+		public function getMembers(
+			array $fields   = [],
+			array $includes = [],
+		) : array {
 			if (empty($this->members)) {
-				\extract($arguments);
-
-				$fields ??= [
-					"member" => \Patreonomy\Resource\Member::ALL_FIELD_FLAGS,
-				];
-
-				$includes ??= [
-					"address",
-					"currently_entitled_tiers",
-					"user",
-				];
-
 				$this->members = $this->__parent->getResources(
 					resource: "Member",
 					endpoint: \Patreonomy\Patreonomy::ENDPOINT_API . "/campaigns/" . $this->getId() . "/members",
-					fields:   $fields,
-					includes: $includes,
+					fields:   $fields ?: [
+						"benefit" => \Patreonomy\Resource\Benefit::ALL_FIELD_FLAGS,
+						"member"  => \Patreonomy\Resource\Member::ALL_FIELD_FLAGS,
+						"tier"    => \Patreonomy\Resource\Tier::ALL_FIELD_FLAGS,
+						"user"    => \Patreonomy\Resource\User::ALL_FIELD_FLAGS,
+					],
+					includes: $includes ?: [
+						"address",
+						"currently_entitled_tiers",
+						"currently_entitled_tiers.benefits",
+						"user",
+					],
 				);
 			}
 
@@ -289,32 +314,102 @@
 
 		/**
 		 * Get a list of all the Posts on a given Campaign by campaign ID. Requires the campaigns.posts scope
-		 * @param  array  $fields   Array of field flags
-		 * @param  array  $includes Array of include flags
-		 * @return array            Array of Post objects
+		 * @param  array $fields   Array of field flags
+		 * @param  array $includes Array of include flags
+		 * @return array           Array of Post objects
 		 */
-		public function getPosts(...$arguments) : array {
+		public function getPosts(
+			array $fields   = [],
+			array $includes = [],
+		) : array {
 			if (empty($this->posts)) {
-				\extract($arguments);
-
-				$fields ??= [
-					"user" => \Patreonomy\Resource\User::ALL_FIELD_FLAGS,
-					"post" => \Patreonomy\Resource\Post::ALL_FIELD_FLAGS,
-				];
-
-				$includes ??= [
-					"campaign",
-					"user",
-				];
-
 				$this->posts = $this->__parent->getResources(
 					resource: "Post",
 					endpoint: \Patreonomy\Patreonomy::ENDPOINT_API . "/campaigns/" . $this->getId() . "/posts",
-					fields:   $fields,
-					includes: $includes,
+					fields:   $fields ?: [
+						"user" => \Patreonomy\Resource\User::ALL_FIELD_FLAGS,
+						"post" => \Patreonomy\Resource\Post::ALL_FIELD_FLAGS,
+					],
+					includes: $includes ?: [
+						"campaign",
+						"user",
+					],
 				);
 			}
 
 			return $this->posts;
+		}
+
+		/**
+		 * Get a list of all the Tiers on a given Campaign by campaign ID
+		 * @param  array $fields   Array of field flags
+		 * @param  array $includes Array of include flags
+		 * @return array           Array of Post objects
+		 */
+		public function getTiers(
+			array $fields   = [],
+			array $includes = [],
+		) : array {
+			if (empty($this->tiers)) {
+				parent::__getData(
+					endpoint: \Patreonomy\Patreonomy::ENDPOINT_API . "/campaigns/" . $this->getId(),
+					fields:   $fields ?: [
+						"benefit" => \Patreonomy\Resource\Benefit::ALL_FIELD_FLAGS,
+						"tier"    => \Patreonomy\Resource\Tier::ALL_FIELD_FLAGS,
+					],
+					includes: $includes ?: [
+						"benefits",
+						"tiers",
+						"tiers.benefits",
+					],
+				);
+			}
+
+			return $this->tiers;
+		}
+
+		/**
+		 * Search the benefits list
+		 * @param  array ...$filters Filters
+		 * @return array             Array of matching Benefit objects
+		 */
+		public function searchBenefits(...$filters) : array {
+			return \Patreonomy\Patreonomy::searchArray($this->getBenefits(), $filters);
+		}
+
+		/**
+		 * Search the goals list
+		 * @param  array ...$filters Filters
+		 * @return array             Array of matching Goal objects
+		 */
+		public function searchGoals(...$filters) : array {
+			return \Patreonomy\Patreonomy::searchArray($this->getGoals(), $filters);
+		}
+
+		/**
+		 * Search the members list
+		 * @param  array ...$filters Filters
+		 * @return array             Array of matching Member objects
+		 */
+		public function searchMembers(...$filters) : array {
+			return \Patreonomy\Patreonomy::searchArray($this->getMembers(), $filters);
+		}
+
+		/**
+		 * Search the posts list
+		 * @param  array ...$filters Filters
+		 * @return array             Array of matching Post objects
+		 */
+		public function searchPosts(...$filters) : array {
+			return \Patreonomy\Patreonomy::searchArray($this->getPosts(), $filters);
+		}
+
+		/**
+		 * Search the tiers list
+		 * @param  array ...$filters Filters
+		 * @return array             Array of matching Tier objects
+		 */
+		public function searchTiers(...$filters) : array {
+			return \Patreonomy\Patreonomy::searchArray($this->getTiers(), $filters);
 		}
 	}

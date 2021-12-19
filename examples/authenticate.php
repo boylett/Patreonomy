@@ -15,4 +15,12 @@
 		webhook_secret: $config["webhook_secret"],
 	);
 
-	\var_dump($patreon->getCampaigns());
+	$campaigns = $patreon->getCampaigns();
+
+	$campaign = \reset($campaigns);
+
+	\var_dump(
+		$campaign->searchMembers(
+			patron_status: "active_patron",
+		)
+	);

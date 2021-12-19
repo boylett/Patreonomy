@@ -74,4 +74,20 @@
 		 * @var \Patreonomy\Resource\User
 		 */
 		public NULL|\Patreonomy\Resource\User $user = NULL;
+
+		/**
+		 * When the instance is casted to a string
+		 * @return string
+		 */
+		public function __toString() : string {
+			return \implode("\n", \array_filter([
+				$this->getAddressee() ?: NULL,
+				$this->getLine1() ?: NULL,
+				$this->getLine2() ?: NULL,
+				$this->getCity() ?: NULL,
+				$this->getState() ?: NULL,
+				$this->getCountry() ?: NULL,
+				$this->getPostalCode() ?: NULL,
+			]));
+		}
 	}

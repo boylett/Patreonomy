@@ -13,6 +13,12 @@
 		 * Monetary amount associated with this tier (in U.S. cents).
 		 * @var int
 		 */
+		public NULL|int $amount = 0;
+		
+		/**
+		 * Monetary amount associated with this tier (in U.S. cents).
+		 * @var int
+		 */
 		public NULL|int $amount_cents = 0;
 		
 		/**
@@ -20,6 +26,12 @@
 		 * @var string
 		 */
 		public NULL|string $created_at = "";
+		
+		/**
+		 * Tier currency.
+		 * @var string
+		 */
+		public NULL|string $currency = "";
 		
 		/**
 		 * Tier display description.
@@ -44,6 +56,12 @@
 		 * @var string
 		 */
 		public NULL|string $image_url = "";
+		
+		/**
+		 * Amount that the patron paid.
+		 * @var int
+		 */
+		public NULL|int $patron_amount_cents = 0;
 		
 		/**
 		 * Number of patrons currently registered for this tier.

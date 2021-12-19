@@ -29,11 +29,14 @@
 
 		/**
 		 * Build an API-compatible set of fields & includes
-		 * @param  array  $fields   Fields
-		 * @param  array  $includes Includes
-		 * @return array            API-compatible array
+         * @param  array $fields   Array of field flags
+         * @param  array $includes Array of include flags
+		 * @return array           API-compatible array
 		 */
-		public static function buildFields(array $fields = [], array $includes = []) : array {
+		public static function buildFields(
+			array $fields   = [],
+			array $includes = [],
+		) : array {
 			$query = [];
 
 			foreach ($fields as $resource => $properties) {
@@ -59,9 +62,12 @@
 		 * @param  array  $arguments Method arguments
 		 * @return mixed             Property value
 		 */
-		public function __call(string $method, array $arguments = []) : mixed {
-			if (\preg_match("/^get([a-zA-Z]+)$/i", $method, $property)) {
-				$property = \strtolower(\preg_replace(["/([a-z\d])([A-Z])/", "/([^_])([A-Z][a-z])/"], "$1_$2", $property[1]));
+		public function __call(
+			string $method,
+			array  $arguments = [],
+		) : mixed {
+			if (\preg_match("/^get([a-zA-Z0-9]+)$/i", $method, $property)) {
+				$property = \strtolower(\preg_replace(["/([a-z0-9\d])([A-Z0-9])/", "/([^_])([A-Z0-9][a-z0-9])/"], "$1_$2", $property[1]));
 
 				if (\property_exists($this, $property)) {
 					return $this->{$property} ?? NULL;
@@ -83,6 +89,31 @@
 		 */
 		public function __debugInfo() : array {
 			return $this->__toArray(true);
+		}
+
+		/**
+		 * Get the data for this resource
+         * @param  string $endpoint Full resource endpoint
+         * @param  array  $fields   Array of field flags
+         * @param  array  $includes Array of include flags
+		 * @return self
+		 */
+		public function __getData(
+            string $endpoint,
+            array  $fields   = [],
+            array  $includes = [],
+		) : self {
+			if (!$this->populated) {
+				$response = $this->__parent->request(
+					endpoint: $endpoint,
+					type:     "GET",
+					data:     static::buildFields($fields, $includes),
+				);
+
+				$this->__populate($response);
+			}
+
+			return $this;
 		}
 
 		/**
@@ -168,15 +199,32 @@
 
 							break;
 
+							case "campaign_installation": {
+								$instance = $this->__parent->CampaignInstallation($relationship["id"]);
+							}
+
+							break;
+
+							case "card": {
+								$instance = $this->__parent->Card($relationship["id"]);
+							}
+
+							break;
+
 							case "category": {
 								$instance = $this->__parent->Category($relationship["id"]);
 							}
 
 							break;
 
-							case "currently_entitled_tiers":
-							case "tier": {
-								$instance = $this->__parent->Tier($relationship["id"]);
+							case "comment": {
+								$instance = $this->__parent->Comment($relationship["id"]);
+							}
+
+							break;
+
+							case "deliverable": {
+								$instance = $this->__parent->Deliverable($relationship["id"]);
 							}
 
 							break;
@@ -187,14 +235,20 @@
 
 							break;
 
+							case "media": {
+								$instance = $this->__parent->Media($relationship["id"]);
+							}
+
+							break;
+
 							case "member": {
 								$instance = $this->__parent->Member($relationship["id"]);
 							}
 
 							break;
 
-							case "user": {
-								$instance = $this->__parent->User($relationship["id"]);
+							case "pledge_event": {
+								$instance = $this->__parent->PledgeEvent($relationship["id"]);
 							}
 
 							break;
@@ -211,9 +265,37 @@
 							}
 
 							break;
+
+							case "currently_entitled_tiers":
+							case "reward":
+							case "tier": {
+								$instance = $this->__parent->Tier($relationship["id"]);
+							}
+
+							break;
+
+							case "user": {
+								$instance = $this->__parent->User($relationship["id"]);
+							}
+
+							break;
+
+							case "webhook": {
+								$instance = $this->__parent->Webhook($relationship["id"]);
+							}
+
+							break;
 						}
 
 						if ($instance) {
+							if ($type_types[$type] === "array" and \in_array($instance, $this->{$type})) {
+								continue;
+							}
+
+							else if ($this->{$type} === $instance) {
+								continue;
+							}
+
 							foreach ($data["included"] ?? [] as $include) {
 								if ((($include["id"] ?? "") === $relationship["id"]) and (($include["type"] ?? "") === $relationship["type"])) {
 									$instance->__populate([ "data" => $include ]);
@@ -284,13 +366,15 @@
 
 		/**
 		 * Export this object as an array
-		 * @param  array|NULL $keys Which properties to export
+		 * @param  array $keys Which properties to export
 		 * @return array
 		 */
-		public function export(array|NULL $keys = NULL) : array {
+		public function export(array $keys = []) : array {
 			$array = $this->__toArray();
 
-			if ($keys !== NULL) {
+			unset($array["populated"]);
+
+			if (!empty($keys)) {
 				$export = [];
 
 				foreach ($keys as $property) {
@@ -301,34 +385,5 @@
 			}
 
 			return $array;
-		}
-
-		/**
-		 * Get the data for this resource
-		 * @param  array ...$arguments Arguments
-		 * @return self
-		 */
-		public function get(...$arguments) : self {
-			if (!$this->populated) {
-				\extract($arguments);
-
-				$endpoint ??= false;
-				$fields   ??= [];
-				$includes ??= [];
-
-				if (!$endpoint) {
-					throw new \Patreonomy\Response\Exception("No endpoint supplied in " . \get_called_class() . "::get()");
-				}
-
-				$response = $this->__parent->request(
-					endpoint: $endpoint,
-					type:     "GET",
-					data:     static::buildFields($fields, $includes),
-				);
-
-				$this->__populate($response);
-			}
-
-			return $this;
 		}
 	}
