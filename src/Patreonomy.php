@@ -673,7 +673,8 @@
 
 		/**
 		 * Retrieve or create an Address instance
-		 * @param string $id Resource ID
+		 * @param  string                       $id Resource ID
+		 * @return \Patreonomy\Resource\Address     Address instance
 		 */
 		public function Address(string $id) : \Patreonomy\Resource\Address {
 			return $this->adopt(\Patreonomy\Resource\Address::__instance($id));
@@ -681,7 +682,8 @@
 
 		/**
 		 * Retrieve or create an Attachment instance
-		 * @param string $id Resource ID
+		 * @param  string                          $id Resource ID
+		 * @return \Patreonomy\Resource\Attachment     Attachment instance
 		 */
 		public function Attachment(string $id) : \Patreonomy\Resource\Attachment {
 			return $this->adopt(\Patreonomy\Resource\Attachment::__instance($id));
@@ -689,7 +691,8 @@
 
 		/**
 		 * Retrieve or create a Benefit instance
-		 * @param string $id Resource ID
+		 * @param  string                       $id Resource ID
+		 * @return \Patreonomy\Resource\Benefit     Benefit instance
 		 */
 		public function Benefit(string $id) : \Patreonomy\Resource\Benefit {
 			return $this->adopt(\Patreonomy\Resource\Benefit::__instance($id));
@@ -697,7 +700,8 @@
 
 		/**
 		 * Retrieve or create a Campaign instance
-		 * @param string $id Resource ID
+		 * @param  string                        $id Resource ID
+		 * @return \Patreonomy\Resource\Campaign     Campaign instance
 		 */
 		public function Campaign(string $id) : \Patreonomy\Resource\Campaign {
 			return $this->adopt(\Patreonomy\Resource\Campaign::__instance($id));
@@ -705,7 +709,8 @@
 
 		/**
 		 * Retrieve or create a CampaignInstallation instance
-		 * @param string $id Resource ID
+		 * @param  string                                    $id Resource ID
+		 * @return \Patreonomy\Resource\CampaignInstallation     CampaignInstallation instance
 		 */
 		public function CampaignInstallation(string $id) : \Patreonomy\Resource\CampaignInstallation {
 			return $this->adopt(\Patreonomy\Resource\CampaignInstallation::__instance($id));
@@ -713,7 +718,8 @@
 
 		/**
 		 * Retrieve or create a Category instance
-		 * @param string $id Resource ID
+		 * @param  string                        $id Resource ID
+		 * @return \Patreonomy\Resource\Category     Category instance
 		 */
 		public function Category(string $id) : \Patreonomy\Resource\Category {
 			return $this->adopt(\Patreonomy\Resource\Category::__instance($id));
@@ -721,7 +727,8 @@
 
 		/**
 		 * Retrieve or create a Comment instance
-		 * @param string $id Resource ID
+		 * @param  string                       $id Resource ID
+		 * @return \Patreonomy\Resource\Comment     Comment instance
 		 */
 		public function Comment(string $id) : \Patreonomy\Resource\Comment {
 			return $this->adopt(\Patreonomy\Resource\Comment::__instance($id));
@@ -729,7 +736,8 @@
 
 		/**
 		 * Retrieve or create a Deliverable instance
-		 * @param string $id Resource ID
+		 * @param  string                           $id Resource ID
+		 * @return \Patreonomy\Resource\Deliverable     Deliverable instance
 		 */
 		public function Deliverable(string $id) : \Patreonomy\Resource\Deliverable {
 			return $this->adopt(\Patreonomy\Resource\Deliverable::__instance($id));
@@ -737,7 +745,8 @@
 
 		/**
 		 * Retrieve or create a Goal instance
-		 * @param string $id Resource ID
+		 * @param  string                       $id Resource ID
+		 * @return \Patreonomy\Resource\Goal Goal instance
 		 */
 		public function Goal(string $id) : \Patreonomy\Resource\Goal {
 			return $this->adopt(\Patreonomy\Resource\Goal::__instance($id));
@@ -745,7 +754,8 @@
 
 		/**
 		 * Retrieve or create a Media instance
-		 * @param string $id Resource ID
+		 * @param  string                     $id Resource ID
+		 * @return \Patreonomy\Resource\Media     Media instance
 		 */
 		public function Media(string $id) : \Patreonomy\Resource\Media {
 			return $this->adopt(\Patreonomy\Resource\Media::__instance($id));
@@ -753,7 +763,8 @@
 
 		/**
 		 * Retrieve or create a Member instance
-		 * @param string $id Resource ID
+		 * @param  string                      $id Resource ID
+		 * @return \Patreonomy\Resource\Member     Member instance
 		 */
 		public function Member(string $id) : \Patreonomy\Resource\Member {
 			return $this->adopt(\Patreonomy\Resource\Member::__instance($id));
@@ -761,23 +772,25 @@
 
 		/**
 		 * Retrieve or create an OAuthClient instance
-		 * @param string $id Resource ID
+		 * @param  string                           $id Resource ID
+		 * @return \Patreonomy\Resource\OAuthClient     OAuthClient instance
 		 */
 		public function OAuthClient(string $id) : \Patreonomy\Resource\OAuthClient {
 			return $this->adopt(\Patreonomy\Resource\OAuthClient::__instance($id));
 		}
 
 		/**
-		 * Retrieve or create an OAuthToken instance
-		 * @param string $id Resource ID
+		 * Create an OAuthToken instance
+		 * @return \Patreonomy\Resource\OAuthToken OAuthToken instance
 		 */
-		public function OAuthToken(string $id) : \Patreonomy\Resource\OAuthToken {
-			return $this->adopt(\Patreonomy\Resource\OAuthToken::__instance($id));
+		public function OAuthToken() : \Patreonomy\Resource\OAuthToken {
+			return $this->adopt(new \Patreonomy\Resource\OAuthToken());
 		}
 
 		/**
 		 * Retrieve or create a PledgeEvent instance
-		 * @param string $id Resource ID
+		 * @param  string                           $id Resource ID
+		 * @return \Patreonomy\Resource\PledgeEvent     PledgeEvent instance
 		 */
 		public function PledgeEvent(string $id) : \Patreonomy\Resource\PledgeEvent {
 			return $this->adopt(\Patreonomy\Resource\PledgeEvent::__instance($id));
@@ -785,7 +798,8 @@
 
 		/**
 		 * Retrieve or create a Post instance
-		 * @param string $id Resource ID
+		 * @param  string                       $id Resource ID
+		 * @return \Patreonomy\Resource\Post Post instance
 		 */
 		public function Post(string $id) : \Patreonomy\Resource\Post {
 			return $this->adopt(\Patreonomy\Resource\Post::__instance($id));
@@ -793,7 +807,8 @@
 
 		/**
 		 * Retrieve or create a PostTag instance
-		 * @param string $id Resource ID
+		 * @param  string                       $id Resource ID
+		 * @return \Patreonomy\Resource\PostTag     PostTag instance
 		 */
 		public function PostTag(string $id) : \Patreonomy\Resource\PostTag {
 			return $this->adopt(\Patreonomy\Resource\PostTag::__instance($id));
@@ -801,7 +816,8 @@
 
 		/**
 		 * Retrieve or create a Tier instance
-		 * @param string $id Resource ID
+		 * @param  string                    $id Resource ID
+		 * @return \Patreonomy\Resource\Tier     Tier instance
 		 */
 		public function Tier(string $id) : \Patreonomy\Resource\Tier {
 			return $this->adopt(\Patreonomy\Resource\Tier::__instance($id));
@@ -809,7 +825,8 @@
 
 		/**
 		 * Retrieve or create a User instance
-		 * @param string $id Resource ID
+		 * @param  string                    $id Resource ID
+		 * @return \Patreonomy\Resource\User     User instance
 		 */
 		public function User(string $id) : \Patreonomy\Resource\User {
 			return $this->adopt(\Patreonomy\Resource\User::__instance($id));
@@ -817,7 +834,8 @@
 
 		/**
 		 * Retrieve or create a Webhook instance
-		 * @param string $id Resource ID
+		 * @param  string                       $id Resource ID
+		 * @return \Patreonomy\Resource\Webhook     Webhook instance
 		 */
 		public function Webhook(string $id) : \Patreonomy\Resource\Webhook {
 			return $this->adopt(\Patreonomy\Resource\Webhook::__instance($id));
