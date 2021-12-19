@@ -1,0 +1,21 @@
+{
+    "name": "patreonomy/patreonomy",
+    "description": "PHP library for interacting with Pateron's v2 API",
+    "type": "library",
+    "autoload": {
+        "psr-4": {
+            "Patreonomy\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Ryan Boylett",
+            "email": "contact@sheezy.art"
+        }
+    ],
+    "minimum-stability": "stable",
+    "require": {
+        "php-64bit": ">=8.0",
+        "guzzlehttp/guzzle": "^7.0"
+    }
+}
