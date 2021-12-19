@@ -140,4 +140,21 @@
 		 * @var \Patreonomy\Resource\Media
 		 */
 		public NULL|\Patreonomy\Resource\Media $tier_image = NULL;
+
+		/**
+		 * Get the data for this resource
+		 * @param  array $fields   Array of field flags
+		 * @param  array $includes Array of include flags
+		 * @return self
+		 */
+		public function get(
+			array $fields   = [],
+			array $includes = [],
+		) : self {
+			return parent::__getData(
+				endpoint: \Patreonomy\Patreonomy::ENDPOINT_LEGACY . "/rewards/" . $this->getId(),
+				fields:   $fields,
+				includes: $includes,
+			);
+		}
 	}

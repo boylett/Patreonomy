@@ -96,18 +96,20 @@
          * @param  string $endpoint Full resource endpoint
          * @param  array  $fields   Array of field flags
          * @param  array  $includes Array of include flags
+         * @param  array  $data     Additional data to send with the request
 		 * @return self
 		 */
 		public function __getData(
             string $endpoint,
             array  $fields   = [],
             array  $includes = [],
+            array  $data     = [],
 		) : self {
 			if (!$this->populated) {
 				$response = $this->__parent->request(
 					endpoint: $endpoint,
 					type:     "GET",
-					data:     static::buildFields($fields, $includes),
+					data:     \array_merge($data, static::buildFields($fields, $includes)),
 				);
 
 				$this->__populate($response);
