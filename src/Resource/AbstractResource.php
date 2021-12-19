@@ -104,8 +104,9 @@
             array  $fields   = [],
             array  $includes = [],
             array  $data     = [],
+            bool   $override = false,
 		) : self {
-			if (!$this->populated) {
+			if (!$this->populated or $override) {
 				$response = $this->__parent->request(
 					endpoint: $endpoint,
 					type:     "GET",

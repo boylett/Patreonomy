@@ -265,6 +265,7 @@
 			if (empty($this->benefits)) {
 				parent::__getData(
 					endpoint: \Patreonomy\Patreonomy::ENDPOINT_API . "/campaigns/" . $this->getId(),
+					override: true,
 					fields:   $fields ?: [
 						"benefit" => \Patreonomy\Resource\Benefit::ALL_FIELD_FLAGS,
 						"tier"    => \Patreonomy\Resource\Tier::ALL_FIELD_FLAGS,
@@ -353,6 +354,7 @@
 			if (empty($this->tiers)) {
 				parent::__getData(
 					endpoint: \Patreonomy\Patreonomy::ENDPOINT_API . "/campaigns/" . $this->getId(),
+					override: true,
 					fields:   $fields ?: [
 						"benefit" => \Patreonomy\Resource\Benefit::ALL_FIELD_FLAGS,
 						"tier"    => \Patreonomy\Resource\Tier::ALL_FIELD_FLAGS,
