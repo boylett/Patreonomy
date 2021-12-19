@@ -6,6 +6,11 @@ Search.appendIndex(
             "summary": "",
             "url": "classes/Patreonomy-Patreonomy.html"
         },                {
+            "fqsen": "\\Patreonomy\\Patreonomy\u003A\u003AsearchArray\u0028\u0029",
+            "name": "searchArray",
+            "summary": "Search\u0020an\u0020array\u0020for\u0020matching\u0020objects",
+            "url": "classes/Patreonomy-Patreonomy.html#method_searchArray"
+        },                {
             "fqsen": "\\Patreonomy\\Patreonomy\u003A\u003Aadopt\u0028\u0029",
             "name": "adopt",
             "summary": "Adopt\u0020a\u0020resource",
@@ -48,7 +53,7 @@ Search.appendIndex(
         },                {
             "fqsen": "\\Patreonomy\\Patreonomy\u003A\u003AgetResources\u0028\u0029",
             "name": "getResources",
-            "summary": "Get\u0020a\u0020set\u0020of\u0020resources\u0020attached\u0020to\u0020this\u0020resource",
+            "summary": "Get\u0020a\u0020set\u0020of\u0020resources",
             "url": "classes/Patreonomy-Patreonomy.html#method_getResources"
         },                {
             "fqsen": "\\Patreonomy\\Patreonomy\u003A\u003AgetWebhooks\u0028\u0029",
@@ -70,6 +75,11 @@ Search.appendIndex(
             "name": "requestOAuthToken",
             "summary": "Request\u0020an\u0020OAuth2\u0020token\u0020from\u0020Patreon",
             "url": "classes/Patreonomy-Patreonomy.html#method_requestOAuthToken"
+        },                {
+            "fqsen": "\\Patreonomy\\Patreonomy\u003A\u003AsearchCampaigns\u0028\u0029",
+            "name": "searchCampaigns",
+            "summary": "Search\u0020the\u0020campaigns\u0020list",
+            "url": "classes/Patreonomy-Patreonomy.html#method_searchCampaigns"
         },                {
             "fqsen": "\\Patreonomy\\Patreonomy\u003A\u003AverifyOAuthState\u0028\u0029",
             "name": "verifyOAuthState",
@@ -231,6 +241,11 @@ Search.appendIndex(
             "summary": "Prune\u0020output\u0020when\u0020debugging",
             "url": "classes/Patreonomy-Resource-AbstractResource.html#method___debugInfo"
         },                {
+            "fqsen": "\\Patreonomy\\Resource\\AbstractResource\u003A\u003A__getData\u0028\u0029",
+            "name": "__getData",
+            "summary": "Get\u0020the\u0020data\u0020for\u0020this\u0020resource",
+            "url": "classes/Patreonomy-Resource-AbstractResource.html#method___getData"
+        },                {
             "fqsen": "\\Patreonomy\\Resource\\AbstractResource\u003A\u003A__instance\u0028\u0029",
             "name": "__instance",
             "summary": "Retrieve\u0020a\u0020cached\u0020instance\u0020or\u0020create\u0020a\u0020new\u0020one",
@@ -256,11 +271,6 @@ Search.appendIndex(
             "summary": "Export\u0020this\u0020object\u0020as\u0020an\u0020array",
             "url": "classes/Patreonomy-Resource-AbstractResource.html#method_export"
         },                {
-            "fqsen": "\\Patreonomy\\Resource\\AbstractResource\u003A\u003Aget\u0028\u0029",
-            "name": "get",
-            "summary": "Get\u0020the\u0020data\u0020for\u0020this\u0020resource",
-            "url": "classes/Patreonomy-Resource-AbstractResource.html#method_get"
-        },                {
             "fqsen": "\\Patreonomy\\Resource\\AbstractResource\u003A\u003A\u0024__parent",
             "name": "__parent",
             "summary": "Parent\u0020controller\u0020instance",
@@ -285,6 +295,11 @@ Search.appendIndex(
             "name": "Address",
             "summary": "",
             "url": "classes/Patreonomy-Resource-Address.html"
+        },                {
+            "fqsen": "\\Patreonomy\\Resource\\Address\u003A\u003A__toString\u0028\u0029",
+            "name": "__toString",
+            "summary": "When\u0020the\u0020instance\u0020is\u0020casted\u0020to\u0020a\u0020string",
+            "url": "classes/Patreonomy-Resource-Address.html#method___toString"
         },                {
             "fqsen": "\\Patreonomy\\Resource\\Address\u003A\u003AALL_FIELD_FLAGS",
             "name": "ALL_FIELD_FLAGS",
@@ -466,6 +481,11 @@ Search.appendIndex(
             "summary": "Get\u0020the\u0020data\u0020for\u0020this\u0020resource",
             "url": "classes/Patreonomy-Resource-Campaign.html#method_get"
         },                {
+            "fqsen": "\\Patreonomy\\Resource\\Campaign\u003A\u003AgetBenefits\u0028\u0029",
+            "name": "getBenefits",
+            "summary": "Get\u0020a\u0020list\u0020of\u0020all\u0020the\u0020Benefits\u0020on\u0020a\u0020given\u0020Campaign\u0020by\u0020campaign\u0020ID",
+            "url": "classes/Patreonomy-Resource-Campaign.html#method_getBenefits"
+        },                {
             "fqsen": "\\Patreonomy\\Resource\\Campaign\u003A\u003AgetMembers\u0028\u0029",
             "name": "getMembers",
             "summary": "Gets\u0020the\u0020Members\u0020for\u0020a\u0020given\u0020Campaign.\u0020Requires\u0020the\u0020campaigns.members\u0020scope",
@@ -475,6 +495,36 @@ Search.appendIndex(
             "name": "getPosts",
             "summary": "Get\u0020a\u0020list\u0020of\u0020all\u0020the\u0020Posts\u0020on\u0020a\u0020given\u0020Campaign\u0020by\u0020campaign\u0020ID.\u0020Requires\u0020the\u0020campaigns.posts\u0020scope",
             "url": "classes/Patreonomy-Resource-Campaign.html#method_getPosts"
+        },                {
+            "fqsen": "\\Patreonomy\\Resource\\Campaign\u003A\u003AgetTiers\u0028\u0029",
+            "name": "getTiers",
+            "summary": "Get\u0020a\u0020list\u0020of\u0020all\u0020the\u0020Tiers\u0020on\u0020a\u0020given\u0020Campaign\u0020by\u0020campaign\u0020ID",
+            "url": "classes/Patreonomy-Resource-Campaign.html#method_getTiers"
+        },                {
+            "fqsen": "\\Patreonomy\\Resource\\Campaign\u003A\u003AsearchBenefits\u0028\u0029",
+            "name": "searchBenefits",
+            "summary": "Search\u0020the\u0020benefits\u0020list",
+            "url": "classes/Patreonomy-Resource-Campaign.html#method_searchBenefits"
+        },                {
+            "fqsen": "\\Patreonomy\\Resource\\Campaign\u003A\u003AsearchGoals\u0028\u0029",
+            "name": "searchGoals",
+            "summary": "Search\u0020the\u0020goals\u0020list",
+            "url": "classes/Patreonomy-Resource-Campaign.html#method_searchGoals"
+        },                {
+            "fqsen": "\\Patreonomy\\Resource\\Campaign\u003A\u003AsearchMembers\u0028\u0029",
+            "name": "searchMembers",
+            "summary": "Search\u0020the\u0020members\u0020list",
+            "url": "classes/Patreonomy-Resource-Campaign.html#method_searchMembers"
+        },                {
+            "fqsen": "\\Patreonomy\\Resource\\Campaign\u003A\u003AsearchPosts\u0028\u0029",
+            "name": "searchPosts",
+            "summary": "Search\u0020the\u0020posts\u0020list",
+            "url": "classes/Patreonomy-Resource-Campaign.html#method_searchPosts"
+        },                {
+            "fqsen": "\\Patreonomy\\Resource\\Campaign\u003A\u003AsearchTiers\u0028\u0029",
+            "name": "searchTiers",
+            "summary": "Search\u0020the\u0020tiers\u0020list",
+            "url": "classes/Patreonomy-Resource-Campaign.html#method_searchTiers"
         },                {
             "fqsen": "\\Patreonomy\\Resource\\Campaign\u003A\u003AALL_FIELD_FLAGS",
             "name": "ALL_FIELD_FLAGS",
@@ -951,6 +1001,11 @@ Search.appendIndex(
             "summary": "Get\u0020the\u0020data\u0020for\u0020this\u0020resource",
             "url": "classes/Patreonomy-Resource-Member.html#method_get"
         },                {
+            "fqsen": "\\Patreonomy\\Resource\\Member\u003A\u003AsearchTiers\u0028\u0029",
+            "name": "searchTiers",
+            "summary": "Search\u0020the\u0020member\u0027s\u0020tiers\u0020list",
+            "url": "classes/Patreonomy-Resource-Member.html#method_searchTiers"
+        },                {
             "fqsen": "\\Patreonomy\\Resource\\Member\u003A\u003AALL_FIELD_FLAGS",
             "name": "ALL_FIELD_FLAGS",
             "summary": "Default\u0020field\u0020flags\u0020set",
@@ -1386,6 +1441,11 @@ Search.appendIndex(
             "summary": "Default\u0020field\u0020flags\u0020set",
             "url": "classes/Patreonomy-Resource-Tier.html#constant_ALL_FIELD_FLAGS"
         },                {
+            "fqsen": "\\Patreonomy\\Resource\\Tier\u003A\u003A\u0024amount",
+            "name": "amount",
+            "summary": "Monetary\u0020amount\u0020associated\u0020with\u0020this\u0020tier\u0020\u0028in\u0020U.S.\u0020cents\u0029.",
+            "url": "classes/Patreonomy-Resource-Tier.html#property_amount"
+        },                {
             "fqsen": "\\Patreonomy\\Resource\\Tier\u003A\u003A\u0024amount_cents",
             "name": "amount_cents",
             "summary": "Monetary\u0020amount\u0020associated\u0020with\u0020this\u0020tier\u0020\u0028in\u0020U.S.\u0020cents\u0029.",
@@ -1395,6 +1455,11 @@ Search.appendIndex(
             "name": "created_at",
             "summary": "\u0028UTC\u0020ISO\u0020format\u0029\tDatetime\u0020this\u0020tier\u0020was\u0020created.",
             "url": "classes/Patreonomy-Resource-Tier.html#property_created_at"
+        },                {
+            "fqsen": "\\Patreonomy\\Resource\\Tier\u003A\u003A\u0024currency",
+            "name": "currency",
+            "summary": "Tier\u0020currency.",
+            "url": "classes/Patreonomy-Resource-Tier.html#property_currency"
         },                {
             "fqsen": "\\Patreonomy\\Resource\\Tier\u003A\u003A\u0024description",
             "name": "description",
@@ -1415,6 +1480,11 @@ Search.appendIndex(
             "name": "image_url",
             "summary": "Full\u0020qualified\u0020image\u0020URL\u0020associated\u0020with\u0020this\u0020tier.\u0020Can\u0020be\u0020null.",
             "url": "classes/Patreonomy-Resource-Tier.html#property_image_url"
+        },                {
+            "fqsen": "\\Patreonomy\\Resource\\Tier\u003A\u003A\u0024patron_amount_cents",
+            "name": "patron_amount_cents",
+            "summary": "Amount\u0020that\u0020the\u0020patron\u0020paid.",
+            "url": "classes/Patreonomy-Resource-Tier.html#property_patron_amount_cents"
         },                {
             "fqsen": "\\Patreonomy\\Resource\\Tier\u003A\u003A\u0024patron_count",
             "name": "patron_count",
