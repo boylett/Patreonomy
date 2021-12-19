@@ -15,4 +15,4 @@
 		webhook_secret: $config["webhook_secret"],
 	);
 
-	\var_dump($patreon->getIdentity());
+	\var_dump($patreon->getCampaigns());

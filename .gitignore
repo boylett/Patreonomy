@@ -1,0 +1,7 @@
+.htaccess
+.phive
+.phpdoc
+/examples/config.php
+/tools/
+/vendor/
+composer.lock
