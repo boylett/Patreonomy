@@ -388,7 +388,7 @@
 			}
 
 			else if (\is_array($scope ?? "")) {
-				$scope = \implode(" ", \array_unique(\array_merge($scope), \explode(" ", $default_scope)));
+				$scope = \implode(" ", \array_unique(\array_merge($scope, \explode(" ", $default_scope))));
 			}
 
 			if (empty($state)) {
